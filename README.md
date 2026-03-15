@@ -13,8 +13,8 @@ This repository contains:
 ### 00_data_files
 * This folder includes all .txt files or working files provided from the class assignment
 
-### 01_R_assignment_key - assignment details and .awk command related to the work
-* This folder contains the answer or key of the R assignment. This include R markdown file and pdf file
+### 01_R_assignment_key 
+* This folder contains the answer or key to the R assignment. This include R markdown file and pdf file
 
 ###  02_output_files
 * This folder contains all the output files that are separated into subfolders
