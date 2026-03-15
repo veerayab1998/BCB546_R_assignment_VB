@@ -63,7 +63,7 @@ git push origin main
 ## Make a pull request
 _do this after you push the file_
 1. Go to **my fork** on my GitHub
-2. Click **"Pull requests."**
+2. Click **"Pull requests menu"** on this assignment repository
 3. Click **"Create Pull Request"** and add message
 Or you can email me, and I can commit it as well
 
