@@ -41,7 +41,7 @@ git add [yourlastname]_review.Rmd
 ```
 ## Commit with a message
 ```
-git commit -m "Add Review output of R assignment from [yourlastname]"
+git commit -m "Add review output of R assignment from [yourlastname]"
 ```
 ## Push to GitHub
 ```
