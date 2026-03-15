@@ -1,28 +1,54 @@
-_!!This read me only contains details on file directory!!_
+_!!This README file only contains details about the file directory!!_
 
-**Please refer to 01_R_assignment_key folder to read the workflow of the assignment**
+**_Please refer to the 01_R_assignment_key folder to read the workflow of the assignment_**
 
 # Overview 
 
 This repository contains:
 
-* 01_R_assignment_key: a process of describing workflow for both data inspection and processing of file as well as visualization plots
+* 01_R_assignment_key: a process of describing the workflow for both data inspection and processing of the file, as well as visualization plots
 * This repository is for the purpose of the BCB546 spring 2026 class assignment
 * All folder details are listed below
 
 ### 00_data_files
-* this folder includes all .txt files or working files provided from the class assignment
+* This folder includes all .txt files or working files provided from the class assignment
 
 ### 01_R_assignment_key - assignment details and .awk command related to the work
-* this folder contains answer or key of R assignment. This include R markdown file and pdf file
+* This folder contains the answer or key of the R assignment. This include R markdown file and pdf file
 
 ###  02_output_files
-* This folder contain all outfiles that are seprated into subfolder
-	### maize folder: contains all 20 maize file (increasing,decreasing)
-	### teosinte folder: contains all 20 teosinte file (increasing,decreasing)
-	### figures folder: contains 3 figures [.png] for visualization part of the assignment
+* This folder contains all the output files that are separated into subfolders
+	* maize folder: contains all 20 maize files (increasing, decreasing)
+   	* teosinte folder: contains all 20 teosinte files (increasing, decreasing)
+	* figures folder: contains 3 figures [.png] for the visualization part of the assignment
 
-**key of R assignment is also at main repository for easy finding**
+**The key to the R assignment is also at the main repository for easy finding**
+
+## Cloning this repository for the first time
+
+You can clone the repository:
+```
+git clone git@github.com:veerayab1998/BCB546_R_assignment_VB.git
+```
+Or you can use the HTTPS URL:
+```
+git clone https://github.com/veerayab1998/BCB546_R_assignment_VB.git
+```
+
+## Add your review file
+```
+git add [yourlastname]_review.Rmd.
+```
+## Commit with a message
+```
+git commit -m "Add Review output of R assignment from [yourlastname]"
+```
+## Push to GitHub
+```
+git push origin main
+```
+Or you can email me, and I can commit it as well
 
 Thank you,
+
     Veeraya Bamrung
