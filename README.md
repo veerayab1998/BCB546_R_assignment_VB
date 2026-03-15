@@ -42,7 +42,12 @@ git clone https://github.com/veerayab1998/BCB546_R_assignment_VB.git
 ```
 
 ## Add your review file
-_Please add your review to the 04 folder using the command below_
+_Please add your review file to the 04 folder using the command below_
+Copy your review file to the review directory
+```
+cp /path/to/your_file/[yourlastname]_review.Rmd 04_review_I_receive/
+```
+Add your file to git
 ```
 git add 04_review_I_receive/[yourlastname]_review.Rmd
 ```
@@ -54,6 +59,11 @@ git commit -m "Add review output of R assignment from [yourlastname]."
 ```
 git push origin main
 ```
+## Make a pull request
+_do this after you push the file_
+1. Go to **my fork** on my GitHub
+2. Click **"Pull requests."**
+3. Click **"Create Pull Request"** and add message
 Or you can email me, and I can commit it as well
 
 Thank you,
