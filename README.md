@@ -65,6 +65,8 @@ git clone git@github.com:[yourusername]/BCB546_R_assignment_VB.git
 ```
 cd /path/to/repository/BCB546_R_assignment_VB
 ```
+* **It is easiest to open BCB546_R_assignment.Rproj to work on my file, or unless you need to set eorking directory to this cloned repository on your local computer**
+
 ## Set your remote commit to your git hub repository
 ```
 git remote set-url origin https://github.com/[yourusername]/BCB546_R_assignment_VB
@@ -75,9 +77,9 @@ git remote -v
 ```
 * it should return:
 
-_origin	https://github.com/[yourusername]/BCB546_R_assignment_VB (fetch)_
+_origin	http://github.com/[yourusername]/BCB546_R_assignment_VB (fetch)_
 
-_origin	https://github.com/[yourusername]/BCB546_R_assignment_VB (push)_
+_origin	http://github.com/[yourusername]/BCB546_R_assignment_VB (push)_
 
 ## Add your review file
 _Please add your review file to the 04 folder using the command below_
