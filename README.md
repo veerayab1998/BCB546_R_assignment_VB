@@ -76,7 +76,9 @@ git remote -v
 * it should return:
 
 _origin	https://github.com/[yourusername]/BCB546_R_assignment_VB (fetch)_
+
 _origin	https://github.com/[yourusername]/BCB546_R_assignment_VB (push)_
+
 ## Add your review file
 _Please add your review file to the 04 folder using the command below_
 
