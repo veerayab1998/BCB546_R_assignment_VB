@@ -65,7 +65,7 @@ git clone git@github.com:[yourusername]/BCB546_R_assignment_VB.git
 ```
 cd /path/to/repository/BCB546_R_assignment_VB
 ```
-* **It is easiest to open BCB546_R_assignment.Rproj to work on my file, or unless you need to set eorking directory to this cloned repository on your local computer**
+* **It is easiest to open BCB546_R_assignment.Rproj to work on my file, or unless you need to set working directory to this cloned repository on your local computer**
 
 ## Set your remote commit to your git hub repository
 ```
