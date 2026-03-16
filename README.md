@@ -100,9 +100,9 @@ git push origin main
 ```
 ## Make a pull request
 _do this after you push the file_
-1. Go to **my fork** on my GitHub
-2. Click **"Pull requests menu"** on this assignment repository
-3. Click **"Create Pull Request"** and add message
+1. Go to **my repository** on **my GitHub**
+2. Click **"Pull requests menu"** 
+3. Click **"Create Pull Request"**
 4. Click **"Compare across folk"** under Compare changes
 5. Change **"head respiratory"** from veerayab1998/BCB546_R_assignment_VB to **"head respiratory:[yourusername]/BCB546_R_assignment_VB"**
 6. Click **"Create Pull Request"**
