@@ -46,8 +46,11 @@ git clone https://github.com/veerayab1998/BCB546_R_assignment_VB.git
 ## Fork my repo on GitHub
 
 _1. Click "Fork" in the top-right corner of this repository_
+
 _2. Click "create a new fork."_
+
 _3. Name it "BCB546_R_assignment_VB"_
+
 
 * That creates a copy under your GitHub account, something like:
 [your_username]/BCB546_R_assignment_VB
