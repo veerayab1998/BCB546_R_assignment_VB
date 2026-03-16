@@ -1,0 +1,454 @@
+---
+title: "R_Assignment_review_of_Veeraya_for_Valerie"
+author: "Veeraya Bamrung"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: true
+  word_document:
+    toc: true
+  html_document:
+    toc: true
+    toc_float: true
+---
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+
+library(readr)
+library(tidyverse)
+```
+
+# Review overall comments (This review conducted on 10:38 am on March,16th)
+* For code-runall, overall, the code run without encountering bug or any issues from R.
+* Only the warning receive is _Warning: NAs introduced by coercion_
+* All the code covers all assignment part I and part II of the assignment
+* Overall is very well done code with very fined details on each sections!
+
+## Review on part I
+This include comments from part I assignment
+
+### Data Inspection part
+* No issues and looks nice!
+* I learn more commands from the part
+
+### Data seperation of mazie and teosinte
+* The code is understable and well organized
+* The output files looks great and fit the assignment requirement
+
+## Review on part II
+
+### SNPs per chromosome
+* It is slightly from what I have done, and I am wondering if I understand correctly that NA include unknown,multiple,and "" in chromosome coloumn
+* Good job, on changing the color
+
+### Missing data and amount of heterozygosity and homozygosity
+* Looks very nice
+* The group on x-axis is a little hard to see
+* Brillant ideas on observation of all the groups in Group column not only just maize and teosinte!
+
+### Own visualization
+* Nice figure overall! I like the pink color
+
+!!**Overall very nice summarization**!!
+
+*End of the review session*
+
+
+
+# Valerie's R Assignment part and result 
+Setting up the R Markdown and loading in R library.
+
+```
+rm(list = ls())
+library(tidyverse)
+library(ggplot2)
+library(tidyr)
+library(tibble)
+library(dplyr)
+```
+
+
+## Part I
+### _Data Inspection_
+`fang_et_al_genotypes.txt`
+
+* There are 2782 rows and 986 columns.
+* The first 3 columns are `Sample_ID`, `JG_OTU`, and `Group`. Then the rest are SNP data (983).
+
+`snp_position.txt`
+
+* There are 983 rows and 15 columns.
+* The columns are named `SNP_ID`, `Chromosome`, `Position`, etc.
+
+```{r}
+# Loading in data from "data" folder and looking at column names. 
+genotypes <- read_tsv("data/fang_et_al_genotypes.txt")
+snp_position <- read_tsv("data/snp_position.txt")
+
+
+# Inspecting the data
+dim(genotypes) # 2782 rows  986 columns
+colnames(genotypes)[1:15] # variable names 
+# head(genotypes) # 1st Sample_ID, 3rd Group
+table(genotypes$Group) 
+  # maize count: ZMMIL 290, ZMMLR 1256, and ZMMMR 27 = 1573
+  # teosinte count: ZMPBA 900, ZMPIL 41, and ZMPJA 34 = 975
+
+
+dim(snp_position) # 983 rows  15 columns
+colnames(snp_position)[1:15] # variable names
+# head(snp_position) # 1st SNP_ID, 3rd Chromosome, 4th Position, etc.
+table(snp_position$Chromosome) # 6 multiple and 27 unknown
+```
+
+### _Data Processing_
+`fang_et_al_genotypes.txt` 
+First, I am cutting out the groups I need for maize and teosinte.
+```{r}
+# Filtering `fang_et_al_genotypes.txt` 
+maize_genotypes <- genotypes %>% filter(Group == "ZMMIL" |
+                                        Group == "ZMMLR" |
+                                        Group == "ZMMMR" )
+teosinte_genotypes <- genotypes %>% filter(Group == "ZMPBA" |
+                                           Group == "ZMPIL" |
+                                           Group == "ZMPJA" )
+# Checking: both result is 3, which is accurate
+n_distinct(maize_genotypes$Group)
+n_distinct(teosinte_genotypes$Group) 
+
+```
+
+Then I will transpose the genotype files so that columns become rows by using t() before joining.
+```{r}
+# MAIZE
+t_maize_genotypes <- as.data.frame(t(maize_genotypes))
+t_maize_genotypes <- t_maize_genotypes[-c(1,2,3),]
+dim(t_maize_genotypes) # 983 rows just like snp_position
+# Add Sample_ID back
+colnames(t_maize_genotypes) <- maize_genotypes$Sample_ID
+
+# TEOSINTE
+t_teosinte_genotypes <- as.data.frame(t(teosinte_genotypes))
+t_teosinte_genotypes <- t_teosinte_genotypes[-c(1,2,3),]
+dim(t_teosinte_genotypes) # 983 rows just like snp_position
+# Add Sample_ID back
+colnames(t_teosinte_genotypes) <- teosinte_genotypes$Sample_ID
+
+
+```
+
+Now I am cleaning snp_position and fixing the join key for genotype files.
+Assignment says files formated with 1st column is "SNP_ID", the 2nd column is "Chromosome", the 3rd column is "Position", and subsequent columns are genotype data from either maize or teosinte individuals."
+_https://stackoverflow.com/questions/29511215/how-can-i-convert-row-names-into-the-first-column_ 
+```{r}
+# Clean snp_position. We only want column 1, 3, 4
+cleaned_snp_position <- select(snp_position, 
+                               "SNP_ID", "Chromosome", "Position")
+# I don't have SNP_ID column name from genotype data so here I add it.
+t_maize_genotypes <- tibble::rownames_to_column(t_maize_genotypes, "SNP_ID")
+t_teosinte_genotypes <- tibble::rownames_to_column(t_teosinte_genotypes, "SNP_ID")
+
+```
+
+Joining snp_position to both of these genotype files.
+_https://r4ds.hadley.nz/joins.html_
+```{r}
+# MAIZE
+joined_maize <- left_join(
+  x = t_maize_genotypes, 
+  y = cleaned_snp_position, 
+  by = "SNP_ID")
+tail(names(joined_maize), 5) # it stuck it onto the end, lets move it to the front
+joined_maize <- joined_maize %>% select(SNP_ID, Chromosome, Position, everything())
+
+
+# TEOSINTE
+joined_teosinte <- left_join(
+  x = t_teosinte_genotypes, 
+  y = cleaned_snp_position, 
+  by = "SNP_ID")
+tail(names(joined_teosinte), 5) # it stuck it onto the end, lets move it to the front
+joined_teosinte <- joined_teosinte %>% select(SNP_ID, Chromosome, Position, everything())
+
+```
+
+Now let's check the new datasets : `joined_maize` and `joined_teosinte`
+```{r}
+unique(joined_maize$Chromosome) # we need to remove multiple and unknown
+joined_maize2 <- filter(joined_maize, 
+                Chromosome != "multiple" & Chromosome != "unknown")
+unique(joined_maize2$Chromosome) # gone!
+
+unique(joined_teosinte$Chromosome) # we need to remove multiple and unknown
+joined_teosinte2 <- filter(joined_teosinte, 
+                Chromosome != "multiple" & Chromosome != "unknown")
+unique(joined_teosinte2$Chromosome)  # gone!
+```
+
+Fixing position and removing positions that are not numeric, and hence can not be sorted by increasing position values.
+```{r}
+class(joined_maize2$Position) # character, should be numeric so I don't sort wrong
+cleaned_maize <- joined_maize2 %>%
+  mutate(Position = as.numeric(Position)) %>%
+  filter(!is.na(Position))
+
+cleaned_teosinte <- joined_teosinte2 %>%
+  mutate(Position = as.numeric(Position)) %>%
+  filter(!is.na(Position))
+
+```
+This is how I would generate the final files for 1 chromosome.
+```{r}
+
+dim(cleaned_maize) # 1576 columns
+test_chr_1 <- cleaned_maize %>%
+  filter(Chromosome == "1")
+test_chr_1_increase <- test_chr_1 %>%
+  arrange(Position) %>%
+  mutate(across(4:1576, function(x){
+    ifelse(x == "?/?", "?", x)
+  })
+  )
+
+test_chr_1_decrease <- test_chr_1 %>%
+  arrange(desc(Position))%>%
+  mutate(across(4:1576, function(x){
+    ifelse(x == "?/?", "-", x)
+  })
+  )
+``` 
+
+Creating a function to do all 10!
+```{r}
+
+final_files <- function (df, chr, name){
+  
+  chr_df <- df %>% filter(Chromosome == chr)
+  chr_increase <- chr_df %>% 
+    arrange(Position) %>%
+    mutate(across(-(1:3), function(x){
+    ifelse(x == "?/?", "?", x)
+  })
+  )
+  
+  chr_decrease <- chr_df %>%
+  arrange(desc(Position))%>%
+  mutate(across(-(1:3), function(x){
+    ifelse(x == "?/?", "-", x)
+  })
+  )
+# write_csv(dataframe, output path should be final_results, delimiters) 
+# I need no spaces with it in the final_maize or final_teosinte folder which is inside the final_results folder. 
+# set up should be : final_results/final_maize/maize_chr1_increasing.csv
+  # which means that the actual file names requires 
+    # name + _chr + "chr" (the actual value) + _increasg.csv
+   write_csv(chr_increase, paste0("final_results/final_", name, "/", 
+                                  name, "_chr", chr, 
+                                  "_increasing.csv") )
+   write_csv(chr_decrease, paste0("final_results/final_", name, "/", 
+                                  name, "_chr", chr, 
+                                  "_decreasing.csv") )
+
+}
+
+```
+
+Using `for loop` since it's fairly short?
+```{r}
+class(cleaned_maize$Chromosome) # characters
+
+for(chr in as.character(1:10)) {
+  final_files(cleaned_maize, chr, "maize") 
+}
+
+for(chr in as.character(1:10)) {
+  final_files(cleaned_teosinte, chr, "teosinte") 
+}
+```
+
+## Part II Visualization
+
+### _SNPs per chromosome_
+__What is the distribution of SNPs on and across chromosomes?__
+
+The graph below answers this question.
+From most to least number of SNPS are:
+Chromosome 1, 2, 5, 3, 7, 4, 6, 8, 9, 10.
+
+```{r}
+# Unsure if we want Chromosome with multiple or unknown since they aren't numerically sortable.
+# This gives us number of SNP sites on each chromosome 1 through 10.
+
+dist_SNPs <- snp_position %>% 
+  filter(Chromosome != "multiple" & Chromosome != "unknown") %>%
+  mutate(Chromosome = as.numeric(Chromosome)) %>%
+  mutate(Chromosome = factor(Chromosome, levels = 1:10)) %>%
+  count(Chromosome)
+ 
+
+  
+ggplot(dist_SNPs, aes(x=Chromosome, y=n)) +
+  geom_bar(stat = "identity", fill = "lightblue2") + 
+  labs (
+    title = "Distribution of SNPs on and across chromosomes",
+    x = "Chromosome",
+    y = "Number of SNPs"
+  ) 
+```
+
+__Are there more SNP positions in maize or teosinte individuals?__ 
+
+There are more SNP positions in __teosinte__ individuals (there are more polymorphic SNP sites).
+
+I believe I am looking for polymporphic SNPS. My thought process is to use `joined_maize` before I removed multiple and unknown chromosomes and non-numeric positions since we want to look at maize and teosinte as a whole.
+```{r}
+poly_maize <- apply(joined_maize[, -(1:3)],1, 
+# we don't want the first 3 columns since that's not genotype data, and so given the data we want, for every row x we do...
+              function (x) {
+                x <- x[x != "?/?"]
+# I don't want missing data because it gets in the way of sorting by unique
+                length(unique(x)) > 1 })
+# Checking if variation, if all the same the monomorphic
+# view(poly_maize) # True for polymorphic, False for monomorphic!
+
+joined_maize$polymorphic <- poly_maize
+# Tacking on a column to end of joined_maize2
+
+poly_maize <- joined_maize  %>% 
+  filter(polymorphic)  %>% 
+  count(Chromosome)  %>% 
+  mutate(Dataset = "maize")
+
+# exact same thing for teosinte
+
+poly_teosinte <- apply(joined_teosinte[, -(1:3)],1, 
+              function (x) {
+                x <- x[x != "?/?"]
+                length(unique(x)) > 1 })
+joined_teosinte$polymorphic <- poly_teosinte
+# Tacking on a column to end of joined_maize
+
+poly_teosinte <- joined_teosinte  %>% 
+  filter(polymorphic)  %>% 
+  count(Chromosome)  %>% 
+  mutate(Dataset = "teosinte")
+
+```
+
+Plot `teosinte` and `maize` now!
+```{r}
+poly_per_chr <- bind_rows(poly_maize, poly_teosinte)
+#view(poly_per_chr)
+
+poly_per_chr <- mutate(poly_per_chr, Chromosome = factor(Chromosome, levels = as.character(1:10)))
+
+ggplot(poly_per_chr, aes(x = Chromosome, y = n, fill = Dataset)) + geom_bar(stat = "identity", position = "dodge") + labs (
+      title = "Polymorphic SNP positions: chromosomes 1 - 10",
+      x = "chromosome",
+      y = "# of polymorphic SNPs"
+)  + scale_fill_manual(values = c("maize" = "goldenrod1", "teosinte" = "forestgreen"))
+
+```
+
+### _Missing data and amount of heterozygosity_
+__What is the proportion of homozygous and heterozygous sites as well as missing data in each sample and each group?__
+
+```{r}
+# here I am sorting for missing, homozygous, and heterzygous by using substr() to see if the genotypes match and sum counts how many sites
+homhetmis <- genotypes %>%
+  mutate(
+    missing = apply(select(., -(1:3)), 1, 
+                    function(x) sum(x == "?/?")),
+    homozygous = apply(select(., -(1:3)), 1, 
+                    function(x) sum(x != "?/?" & substr(x,1,1) == substr(x,3,3))),
+    heterozygous = apply(select(., -(1:3)), 1, 
+                    function(x) sum(x != "?/?" & substr(x,1,1) != substr(x,3,3)))
+    )
+
+# now I'm totaling the sites
+homhetmis <- homhetmis %>%
+  mutate(total = missing + homozygous + heterozygous,
+         proportion_miss = missing / total,
+         proportion_homo = homozygous / total,
+         proportion_hete = heterozygous / total)
+
+# now I need to check my dataframe and take what I need
+select(homhetmis, Sample_ID, Group, proportion_miss, proportion_hete, proportion_homo)
+
+# now putting Samples into their Group
+group_homhetmis <- homhetmis %>%
+  group_by(Group) %>%
+  summarise(
+    mean_miss = mean(proportion_miss),
+    mean_hete = mean(proportion_hete),
+    mean_homo = mean(proportion_homo)
+  )
+# creating that new column to indicate whether a particular site is homozygous
+plot_homhetmis <- bind_rows(
+  group_homhetmis %>%
+    select(Group, prop = mean_miss) %>%
+  mutate(site = "missing"),
+
+  group_homhetmis %>%
+   select(Group, prop = mean_homo) %>%
+  mutate(site = "homozygous"),   
+ 
+   group_homhetmis %>%
+     select(Group, prop = mean_hete) %>%
+  mutate(site = "heterozygous"))
+
+ggplot(plot_homhetmis, aes(x = Group, y = prop, fill = site)) +
+  geom_col(position = "fill") + labs(
+    title = "Proportion of missing, homozygous, and heterozygous sites by group",
+    x = "group",
+    y = "propotion"
+  ) +
+#?scale_fill_manual
+  scale_fill_manual(values = c("missing" = "mediumpurple2", "homozygous" = "lightblue2", "heterozygous" = "coral2"))
+
+
+```
+
+### _Your own visualization_
+__Visualize one other feature of the dataset. The choice is up to you!__
+```{r}
+# I am plotting the genomoic position of polymorphic sites.
+# Since I used joined_maize for the polymorphic work above, I'll use it again. 
+
+plot_mazie_poly <- joined_maize  %>% 
+  filter(polymorphic)  %>% 
+  
+# I have to remove unknown and multiples again, they created an N/A column  
+  mutate(Dataset = "maize", Position = as.numeric(Position) ) %>%
+  filter(!is.na(Position)) %>%
+
+# Sorts alphanumerically again so....
+  mutate(Chromosome = factor(Chromosome, levels = 1:10))
+  
+
+plot_teosinte_poly <- joined_teosinte  %>% 
+  filter(polymorphic)  %>% 
+  mutate(Dataset = "teosinte", Position = as.numeric(Position) ) %>%
+  filter(!is.na(Position)) %>%
+  mutate(Chromosome = factor(Chromosome, levels = 1:10))
+
+# combine them
+plot_poly_position <- bind_rows(plot_mazie_poly, plot_teosinte_poly )
+
+# increased binwidth, small numbers spit error
+ggplot(plot_poly_position, aes(x=Position)) +
+  geom_histogram(binwidth=1000000, fill = "black", color = "hotpink2") + 
+  facet_wrap( ~ Chromosome) + 
+  
+  labs (
+    title = "Distribution of SNP position across chromosomes 1-10",
+    x = "position",
+    y = "# of SNPs"
+  ) 
+```
+

@@ -1,0 +1,322 @@
+---
+title: "R Assignment Review of Nathan Kreuter by Veeraya Bamrung"
+author: "Veeraya Bamrungr"
+date: "2026-03-16"
+output:
+  pdf_document:
+    toc: true
+  word_document:
+    toc: true
+  html_document:
+    toc: true
+    toc_float: true
+---
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+# Review overall comments (This review conducted on 8:57 am on March,16th)
+* This review conducted early on Monday and potentially miss some fixs from Nathan
+* For code-runall, overall, the code run without encountering bug or any issue from R.
+* Only the warning receive is _Warning: NAs introduced by coercion_
+* All the code covers all assignment part I and part II of the assignment
+* _I noticed that output files from maize and teosinte have not shown up in the directories, potentially from outdir path or NAs error_
+* Overall is very well done. I would go back and check the part that create a 20 files for maize and teosinte. I would also add a README.md for describing directories. Overall, it is nice!
+
+### Review on part I
+This include comments from part I assignment
+
+### Data Inspection part
+* look nice and well
+* I learn more commands from the part
+
+### Data seperation of mazie and teosinte
+
+* I have not successfully replicate the outputs from the .Rmd, potentially from outdir path different or NAs error or missing outdirpath commands
+* The code is understable and well organized
+
+### Review on part II
+
+## SNPs per chromosome
+* It is different from what  have done but it shows the distribution of the SNPs in chromosome, looks very cool
+
+## Missing data and amount of heterozygosity and homozygosity
+* Looks very nice
+
+## Own visualization
+* Looks very nice and cool. Although, we did not do boxplot in class, this represent the data well
+
+*End of the review session*
+
+
+#Part 1
+##Data Inspection
+
+Clear environment, import data, and load libraries.
+```{r, echo=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+rm(list = ls())
+fang <- read.delim("data/fang_et_al_genotypes.txt")
+snp <- read.delim("data/snp_position.txt")
+```
+
+Look at:
+1) File structure
+```{r, results='hide'}
+str(snp)  
+str(fang) 
+```
+2) First lines
+```{r, results='hide'}
+head(snp)
+head(fang)
+```
+3) Dimensions
+```{r, results='hide'}
+dim(snp)
+dim(fang)
+```
+4) Rows and columns
+```{r, results='hide'}
+nrow(snp); ncol(snp)
+nrow(fang); ncol(fang)
+```
+5) Variable summary
+```{r, results='hide'}
+summary(snp)
+summary(fang)
+```
+
+#Data Processing
+
+Filter the fang dataset into one containing maize genotypes and teosinte genoytpes. Then transpose the filtered datasets separately.  
+```{r, results='hide'}
+fang_maize <- fang[ fang[,3] %in% c("ZMMIL", "ZMMLR", "ZMMMR"), ]
+fang_teosinte <- fang[ fang[,3] %in% c("ZMPBA", "ZMPIL", "ZMPJA"), ]
+
+genotypes_maize <- t(fang_maize[,-(1:3)])
+genotypes_teosinte <- t(fang_teosinte[,-(1:3)])
+```
+
+Make a column labeled SNP_ID containing the row names which can be used to join with the snp file.
+```{r, results='hide'}
+genotypes_maize_df <- data.frame(SNP_ID = rownames(genotypes_maize), genotypes_maize, check.names = FALSE)
+genotypes_teosinte_df <- data.frame(SNP_ID = rownames(genotypes_teosinte), genotypes_teosinte, check.names = FALSE)
+
+joined_maize <- inner_join(snp, genotypes_maize_df, by = "SNP_ID")
+joined_teosinte <- inner_join(snp, genotypes_teosinte_df, by = "SNP_ID")
+```
+
+Remove columns 2, and 5-15 to leave behind only SNP_ID, Chromosome, Position, and genotype data. Also, make the "Position" column numeric for sorting by increasing/decreasing position
+```{r, results='hide'}
+fang_maize_clean    <- joined_maize[, -c(2, 5:15)]
+fang_teosinte_clean <- joined_teosinte[, -c(2, 5:15)]
+
+fang_maize_clean$Position <- as.numeric(fang_maize_clean$Position)
+fang_teosinte_clean$Position <- as.numeric(fang_teosinte_clean$Position)
+```
+
+Sort by Chromosome and order based on Position, and replace missing data respectively.
+For maize in increasing order and replacing missing data with "?"
+```{r, results='hide'}
+maize_inc_chr1 <- fang_maize_clean[fang_maize_clean$Chromosome == 1, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 1, ]$Position), ]
+maize_inc_chr1[,4:ncol(maize_inc_chr1)][maize_inc_chr1[,4:ncol(maize_inc_chr1)] == "?/?"] <- "?"
+maize_inc_chr2 <- fang_maize_clean[fang_maize_clean$Chromosome == 2, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 2, ]$Position), ]
+maize_inc_chr2[,4:ncol(maize_inc_chr2)][maize_inc_chr2[,4:ncol(maize_inc_chr2)] == "?/?"] <- "?"
+maize_inc_chr3 <- fang_maize_clean[fang_maize_clean$Chromosome == 3, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 3, ]$Position), ]
+maize_inc_chr3[,4:ncol(maize_inc_chr1)][maize_inc_chr3[,4:ncol(maize_inc_chr3)] == "?/?"] <- "?"
+maize_inc_chr4 <- fang_maize_clean[fang_maize_clean$Chromosome == 4, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 4, ]$Position), ]
+maize_inc_chr4[,4:ncol(maize_inc_chr4)][maize_inc_chr4[,4:ncol(maize_inc_chr4)] == "?/?"] <- "?"
+maize_inc_chr5 <- fang_maize_clean[fang_maize_clean$Chromosome == 5, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 5, ]$Position), ]
+maize_inc_chr5[,4:ncol(maize_inc_chr5)][maize_inc_chr5[,4:ncol(maize_inc_chr5)] == "?/?"] <- "?"
+maize_inc_chr6 <- fang_maize_clean[fang_maize_clean$Chromosome == 6, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 6, ]$Position), ]
+maize_inc_chr6[,4:ncol(maize_inc_chr6)][maize_inc_chr6[,4:ncol(maize_inc_chr6)] == "?/?"] <- "?"
+maize_inc_chr7 <- fang_maize_clean[fang_maize_clean$Chromosome == 7, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 7, ]$Position), ]
+maize_inc_chr7[,4:ncol(maize_inc_chr7)][maize_inc_chr7[,4:ncol(maize_inc_chr7)] == "?/?"] <- "?"
+maize_inc_chr8 <- fang_maize_clean[fang_maize_clean$Chromosome == 8, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 8, ]$Position), ]
+maize_inc_chr8[,4:ncol(maize_inc_chr8)][maize_inc_chr8[,4:ncol(maize_inc_chr8)] == "?/?"] <- "?"
+maize_inc_chr9 <- fang_maize_clean[fang_maize_clean$Chromosome == 9, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 9, ]$Position), ]
+maize_inc_chr9[,4:ncol(maize_inc_chr9)][maize_inc_chr9[,4:ncol(maize_inc_chr9)] == "?/?"] <- "?"
+maize_inc_chr10 <- fang_maize_clean[fang_maize_clean$Chromosome == 10, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 10, ]$Position), ]
+maize_inc_chr10[,4:ncol(maize_inc_chr10)][maize_inc_chr10[,4:ncol(maize_inc_chr10)] == "?/?"] <- "?"
+```
+
+For maize in decreasing order and replacing missing data with "-"
+```{r, results='hide'}
+maize_dec_chr1 <- fang_maize_clean[fang_maize_clean$Chromosome == 1, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 1, ]$Position, decreasing = TRUE), ]
+maize_dec_chr1[,4:ncol(maize_dec_chr1)][maize_dec_chr1[,4:ncol(maize_dec_chr1)] == "?/?"] <- "-"
+maize_dec_chr2 <- fang_maize_clean[fang_maize_clean$Chromosome == 2, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 2, ]$Position, decreasing = TRUE), ]
+maize_dec_chr2[,4:ncol(maize_dec_chr2)][maize_dec_chr2[,4:ncol(maize_dec_chr2)] == "?/?"] <- "-"
+maize_dec_chr3 <- fang_maize_clean[fang_maize_clean$Chromosome == 3, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 3, ]$Position, decreasing = TRUE), ]
+maize_dec_chr3[,4:ncol(maize_dec_chr3)][maize_dec_chr3[,4:ncol(maize_dec_chr3)] == "?/?"] <- "-"
+maize_dec_chr4 <- fang_maize_clean[fang_maize_clean$Chromosome == 4, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 4, ]$Position, decreasing = TRUE), ]
+maize_dec_chr4[,4:ncol(maize_dec_chr4)][maize_dec_chr4[,4:ncol(maize_dec_chr4)] == "?/?"] <- "-"
+maize_dec_chr5 <- fang_maize_clean[fang_maize_clean$Chromosome == 5, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 5, ]$Position, decreasing = TRUE), ]
+maize_dec_chr5[,4:ncol(maize_dec_chr5)][maize_dec_chr5[,4:ncol(maize_dec_chr5)] == "?/?"] <- "-"
+maize_dec_chr6 <- fang_maize_clean[fang_maize_clean$Chromosome == 6, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 6, ]$Position, decreasing = TRUE), ]
+maize_dec_chr6[,4:ncol(maize_dec_chr6)][maize_dec_chr6[,4:ncol(maize_dec_chr6)] == "?/?"] <- "-"
+maize_dec_chr7 <- fang_maize_clean[fang_maize_clean$Chromosome == 7, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 7, ]$Position, decreasing = TRUE), ]
+maize_dec_chr7[,4:ncol(maize_dec_chr7)][maize_dec_chr7[,4:ncol(maize_dec_chr7)] == "?/?"] <- "-"
+maize_dec_chr8 <- fang_maize_clean[fang_maize_clean$Chromosome == 8, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 8, ]$Position, decreasing = TRUE), ]
+maize_dec_chr8[,4:ncol(maize_dec_chr8)][maize_dec_chr8[,4:ncol(maize_dec_chr8)] == "?/?"] <- "-"
+maize_dec_chr9 <- fang_maize_clean[fang_maize_clean$Chromosome == 9, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 9, ]$Position, decreasing = TRUE), ]
+maize_dec_chr9[,4:ncol(maize_dec_chr9)][maize_dec_chr9[,4:ncol(maize_dec_chr9)] == "?/?"] <- "-"
+maize_dec_chr10 <- fang_maize_clean[fang_maize_clean$Chromosome == 10, ][order(fang_maize_clean[fang_maize_clean$Chromosome == 10, ]$Position, decreasing = TRUE), ]
+maize_dec_chr10[,4:ncol(maize_dec_chr10)][maize_dec_chr10[,4:ncol(maize_dec_chr10)] == "?/?"] <- "-"
+```
+
+For teosinte in increasing order and replacing missing data with "?"
+```{r, results='hide'}
+teosinte_inc_chr1 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 1, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 1, ]$Position), ]
+teosinte_inc_chr1[,4:ncol(teosinte_inc_chr1)][teosinte_inc_chr1[,4:ncol(teosinte_inc_chr1)] == "?/?"] <- "?"
+teosinte_inc_chr2 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 2, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 2, ]$Position), ]
+teosinte_inc_chr2[,4:ncol(teosinte_inc_chr2)][teosinte_inc_chr2[,4:ncol(teosinte_inc_chr2)] == "?/?"] <- "?"
+teosinte_inc_chr3 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 3, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 3, ]$Position), ]
+teosinte_inc_chr3[,4:ncol(teosinte_inc_chr3)][teosinte_inc_chr3[,4:ncol(teosinte_inc_chr3)] == "?/?"] <- "?"
+teosinte_inc_chr4 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 4, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 4, ]$Position), ]
+teosinte_inc_chr4[,4:ncol(teosinte_inc_chr4)][teosinte_inc_chr4[,4:ncol(teosinte_inc_chr4)] == "?/?"] <- "?"
+teosinte_inc_chr5 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 5, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 5, ]$Position), ]
+teosinte_inc_chr5[,4:ncol(teosinte_inc_chr5)][teosinte_inc_chr5[,4:ncol(teosinte_inc_chr5)] == "?/?"] <- "?"
+teosinte_inc_chr6 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 6, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 6, ]$Position), ]
+teosinte_inc_chr6[,4:ncol(teosinte_inc_chr6)][teosinte_inc_chr6[,4:ncol(teosinte_inc_chr6)] == "?/?"] <- "?"
+teosinte_inc_chr7 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 7, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 7, ]$Position), ]
+teosinte_inc_chr7[,4:ncol(teosinte_inc_chr7)][teosinte_inc_chr7[,4:ncol(teosinte_inc_chr7)] == "?/?"] <- "?"
+teosinte_inc_chr8 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 8, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 8, ]$Position), ]
+teosinte_inc_chr8[,4:ncol(teosinte_inc_chr8)][teosinte_inc_chr8[,4:ncol(teosinte_inc_chr8)] == "?/?"] <- "?"
+teosinte_inc_chr9 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 9, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 9, ]$Position), ]
+teosinte_inc_chr9[,4:ncol(teosinte_inc_chr9)][teosinte_inc_chr9[,4:ncol(teosinte_inc_chr9)] == "?/?"] <- "?"
+teosinte_inc_chr10 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 10, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 10, ]$Position), ]
+teosinte_inc_chr10[,4:ncol(teosinte_inc_chr10)][teosinte_inc_chr10[,4:ncol(teosinte_inc_chr10)] == "?/?"] <- "?"
+```
+
+For teosinte in decreasing order and replacing missing data with "-"
+```{r, results='hide'}
+teosinte_dec_chr1 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 1, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 1, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr1[,4:ncol(teosinte_dec_chr1)][teosinte_dec_chr1[,4:ncol(teosinte_dec_chr1)] == "?/?"] <- "-"
+teosinte_dec_chr2 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 2, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 2, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr2[,4:ncol(teosinte_dec_chr2)][teosinte_dec_chr2[,4:ncol(teosinte_dec_chr2)] == "?/?"] <- "-"
+teosinte_dec_chr3 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 3, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 3, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr3[,4:ncol(teosinte_dec_chr3)][teosinte_dec_chr3[,4:ncol(teosinte_dec_chr3)] == "?/?"] <- "-"
+teosinte_dec_chr4 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 4, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 4, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr4[,4:ncol(teosinte_dec_chr4)][teosinte_dec_chr4[,4:ncol(teosinte_dec_chr4)] == "?/?"] <- "-"
+teosinte_dec_chr5 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 5, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 5, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr5[,4:ncol(teosinte_dec_chr5)][teosinte_dec_chr5[,4:ncol(teosinte_dec_chr5)] == "?/?"] <- "-"
+teosinte_dec_chr6 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 6, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 6, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr6[,4:ncol(teosinte_dec_chr6)][teosinte_dec_chr6[,4:ncol(teosinte_dec_chr6)] == "?/?"] <- "-"
+teosinte_dec_chr7 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 7, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 7, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr7[,4:ncol(teosinte_dec_chr7)][teosinte_dec_chr7[,4:ncol(teosinte_dec_chr7)] == "?/?"] <- "-"
+teosinte_dec_chr8 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 8, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 8, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr8[,4:ncol(teosinte_dec_chr8)][teosinte_dec_chr8[,4:ncol(teosinte_dec_chr8)] == "?/?"] <- "-"
+teosinte_dec_chr9 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 9, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 9, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr9[,4:ncol(teosinte_dec_chr9)][teosinte_dec_chr9[,4:ncol(teosinte_dec_chr9)] == "?/?"] <- "-"
+teosinte_dec_chr10 <- fang_teosinte_clean[fang_teosinte_clean$Chromosome == 10, ][order(fang_teosinte_clean[fang_teosinte_clean$Chromosome == 10, ]$Position, decreasing = TRUE), ]
+teosinte_dec_chr10[,4:ncol(teosinte_dec_chr10)][teosinte_dec_chr10[,4:ncol(teosinte_dec_chr10)] == "?/?"] <- "-"
+```
+
+#Part 2
+##Visualization
+
+##SNPs per chromosome
+
+Using the clean fang maize or teosinte files (used to sort by chromosome), remove the "Unknown" and "Missing" descriptors under the "Chromosome" column. Then, make Chromosome a factor with numeric order for proper plotting.
+```{r, results='hide'}
+snp_filtered <- fang_maize_clean %>% 
+  filter(!(Chromosome %in% c("unknown", "multiple")))
+
+snp_filtered <- snp_filtered %>%
+  mutate(Chromosome = factor(Chromosome, levels = as.character(1:10)))
+```
+
+Plot snp_filtered. This will show how each SNP_ID is positioned across the chromosomes.
+```{r}
+ggplot(snp_filtered, aes(x = Position, y = factor(Chromosome))) +
+  geom_point(alpha = 0.5, size = 1) +
+  labs(x = "Position on chromosome",
+       y = "Chromosome",
+       title = "Distribution of SNPs along chromosomes") +
+  theme_minimal()
+```
+
+##Missing data and amount of heterozygosity
+To see if there are more SNP positions in maize or teosinte, start by converting the dataset from wide to long.
+```{r, results='hide'}
+maize_long <- fang_maize_clean %>%
+  pivot_longer(
+    cols = 4:ncol(fang_maize_clean),
+    names_to = "Sample",
+    values_to = "Genotype")
+
+teosinte_long <- fang_teosinte_clean %>%
+  pivot_longer(
+    cols = 4:ncol(fang_teosinte_clean),
+    names_to = "Sample",
+    values_to = "Genotype")
+```
+
+This code creates a new "SiteType" column and uses case_when to identify if nucleotides follow a homozygous/heterozygous/missng pattern and labels accordingly for each SNP_ID.
+A "Group" column is also added to each long and labeled maize/teosinte respectively. These files are then combined.
+```{r, results='hide'}
+maize_long <- maize_long %>%
+  mutate(SiteType = case_when(
+    Genotype == "?/?" ~ "Missing",
+    sub("/.*","",Genotype) == sub(".*/","",Genotype) ~ "Homozygous",
+    TRUE ~ "Heterozygous"))
+teosinte_long <- teosinte_long %>%
+  mutate(SiteType = case_when(
+    Genotype == "?/?" ~ "Missing",
+    sub("/.*","",Genotype) == sub(".*/","",Genotype) ~ "Homozygous",
+    TRUE ~ "Heterozygous"))
+
+maize_long$Group <- "Maize"
+teosinte_long$Group <- "Teosinte"
+combined_long <- rbind(maize_long, teosinte_long)
+```
+
+Plot the proportion of homozygous, heterozygous, and missing sites in each
+sample for each group, then across groups. 
+```{r}
+ggplot(maize_long, aes(x = Sample, fill = SiteType)) +
+  geom_bar(position = "fill") +
+  ylab("Proportion") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(teosinte_long, aes(x = Sample, fill = SiteType)) +
+  geom_bar(position = "fill") +
+  ylab("Proportion") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(combined_long, aes(x = Group, fill = SiteType)) +
+  geom_bar(position = "fill") +
+  ylab("Proportion") +
+  theme_bw()
+```
+
+##Your own visualization
+
+The aim is to make a graph showing if individuals across groups are more/less genetically diverse. First, create a new data frame (by using the previously made combined_long data frame) with columns "Group," "Sample," and "Heterozygosity." For each sample, Heterozygosity is calculated as the proportion of heterozygous sites, using mean(SiteType == "Heterozygous"), where TRUE corresponds to a site being heterozygous."
+```{r, results='hide'}
+hetero_rate <- combined_long %>%
+  filter(SiteType != "Missing") %>%
+  group_by(Group, Sample) %>%
+  summarise(
+    heterozygosity = mean(SiteType == "Heterozygous")
+  )
+```
+
+Then plot to show how often each sample within each group is heterozygous.
+```{r}
+ggplot(hetero_rate, aes(x = Group, y = heterozygosity, fill = Group)) +
+  geom_boxplot() +
+  ylab("Heterozygosity rate") +
+  ggtitle("Genetic diversity per individual") +
+  theme_bw()
+```
