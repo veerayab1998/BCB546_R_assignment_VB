@@ -1,0 +1,24 @@
+Peer Review for Veeraya Bamrung (VB_R_assignment)
+
+Reviewer: Nesreen Sedeekd
+
+Repository & README
+Organization: The repository is organized and clear to go through. It might be a good idea to seperate the ascending and descending files? I really liked the provided instructions in the Read.me for your git.
+
+Reproducibility: I was able to clone the repo and found the files organized and went through them.
+
+Data Inspection
+Execution: The author provided few necessary commands to inspect the data correctly. Clarity: The commands are showing clear and easy to use data information that is needed for inspection.
+
+Data Processing
+Accuracy: I checked the 40 required files (Maize and Teosinte) were generated and are located in the correct output folders.
+
+Formatting: I went through the author coding, white it looks all good and I verified the files that were generated and they look correctly, I am struggling with the transpose step and for some reason it looks liks it is looping on my laptop? not sure if it might be the files naming?
+
+Coding Style: The use of custom functions to automate file generation is efficient and much more readable than nested loops.
+
+Visualization
+SNP Distribution: Plots are showing SNP counts across chromosomes also comparing Maize vs. Teosinte distribution. Genotype Proportion: The proportion ploteffectively uses position = "fill" to show Homozygous/Heterozygous/Missing ratios. Personal Plot: The "Heterozygosity by Chromosome" plot provides a good understanding of samples diversity.
+
+Summary & Suggestions
+Conclusion: This is a professional, well-structured, and fully reproducible submission.
